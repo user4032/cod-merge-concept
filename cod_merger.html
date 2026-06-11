@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COD Account Merger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #000000;
+  --bg1: #0a0a0a;
+  --bg2: #111111;
+  --bg3: #1a1a1a;
+  --bg4: #222222;
+  --text: #ededed;
+  --text2: #888888;
+  --text3: #444444;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --border3: rgba(255,255,255,0.18);
+  --accent: #ffffff;
+  --blue: #3291ff;
+  --blue-bg: rgba(50,145,255,0.1);
+  --green: #50e3c2;
+  --green-bg: rgba(80,227,194,0.08);
+  --amber: #f5a623;
+  --amber-bg: rgba(245,166,35,0.08);
+  --red: #ff4444;
+  --red-bg: rgba(255,68,68,0.08);
+  --radius: 6px;
+  --radius-lg: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 3rem 1rem;
+  color: var(--text);
+}
+.app {
+  width: 100%;
+  max-width: 560px;
+}
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2rem;
+}
+.app-logo {
+  width: 24px;
+  height: 24px;
+  background: var(--text);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.app-logo svg { display: block; }
+.app-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.app-title span {
+  color: var(--text2);
+  margin: 0 6px;
+}
+.step { display: none; }
+.step.active { display: block; }
+
+/* Stepper */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 2rem;
+}
+.step-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text3);
+  font-family: 'Geist Mono', monospace;
+  flex-shrink: 0;
+  background: var(--bg1);
+}
+.step-dot.done {
+  background: var(--green-bg);
+  border-color: var(--green);
+  color: var(--green);
+}
+.step-dot.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+.step-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.step-line.done { background: var(--border3); }
+
+/* Section title */
+.section-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-family: 'Geist Mono', monospace;
+}
+
+/* Account cards */
+.acc-card {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.acc-card:hover { border-color: var(--border3); background: var(--bg2); }
+.acc-card.selected {
+  border-color: var(--text);
+  background: var(--bg2);
+}
+.acc-row { display: flex; align-items: center; gap: 12px; }
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+  font-family: 'Geist Mono', monospace;
+  border: 1px solid var(--border2);
+}
+.av-xbox { background: var(--green-bg); color: var(--green); border-color: rgba(80,227,194,0.2); }
+.av-steam { background: var(--blue-bg); color: var(--blue); border-color: rgba(50,145,255,0.2); }
+.acc-info { flex: 1; min-width: 0; }
+.acc-name { font-size: 14px; font-weight: 500; color: var(--text); letter-spacing: -0.01em; }
+.acc-meta { font-size: 12px; color: var(--text2); margin-top: 2px; font-family: 'Geist Mono', monospace; }
+.acc-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-family: 'Geist Mono', monospace;
+  transition: all 0.15s;
+}
+.acc-card.selected .acc-badge {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--border3);
+  color: var(--text);
+}
+.acc-stats {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 6px;
+  margin-top: 12px;
+}
+.stat {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+}
+.stat-val { font-size: 16px; font-weight: 500; color: var(--text); font-family: 'Geist Mono', monospace; }
+.stat-lbl { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+/* Buttons */
+.btn-row { display: flex; gap: 8px; margin-top: 1.5rem; }
+.btn {
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: -0.01em;
+}
+.btn-primary {
+  background: var(--text);
+  color: var(--bg);
+  border: 1px solid var(--text);
+}
+.btn-primary:hover { background: #d4d4d4; border-color: #d4d4d4; }
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border2);
+}
+.btn-ghost:hover { background: var(--bg2); color: var(--text); border-color: var(--border3); }
+.btn-primary:disabled, .btn-primary[disabled] {
+  background: var(--bg3);
+  color: var(--text3);
+  border-color: var(--border);
+  cursor: not-allowed;
+}
+
+/* Category rows */
+.cat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+  transition: border-color 0.1s;
+}
+.cat-row:hover { border-color: var(--border2); }
+.cat-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.cat-ico.blue { background: var(--blue-bg); color: var(--blue); }
+.cat-ico.green { background: var(--green-bg); color: var(--green); }
+.cat-ico.amber { background: var(--amber-bg); color: var(--amber); }
+.cat-ico.red { background: var(--red-bg); color: var(--red); }
+.cat-body { flex: 1; min-width: 0; }
+.cat-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.cat-desc { font-size: 11px; color: var(--text2); margin-top: 1px; font-family: 'Geist Mono', monospace; }
+.conflict-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--amber-bg);
+  color: var(--amber);
+  border: 1px solid rgba(245,166,35,0.2);
+  margin-left: 6px;
+  font-family: 'Geist Mono', monospace;
+  vertical-align: middle;
+}
+.seg {
+  display: flex;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.seg-btn {
+  padding: 5px 10px;
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border2);
+  color: var(--text3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.1s;
+  font-family: 'Geist Mono', monospace;
+}
+.seg-btn:last-child { border-right: none; }
+.seg-btn:hover { color: var(--text2); background: var(--bg3); }
+.seg-btn.on-merge { background: var(--green-bg); color: var(--green); }
+.seg-btn.on-main { background: var(--blue-bg); color: var(--blue); }
+.seg-btn.on-skip { background: var(--bg3); color: var(--text3); }
+
+/* Summary */
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+.sum-card {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.sum-label { font-size: 11px; color: var(--text2); font-family: 'Geist Mono', monospace; text-transform: uppercase; letter-spacing: 0.04em; }
+.sum-val { font-size: 18px; font-weight: 500; color: var(--text); margin-top: 4px; font-family: 'Geist Mono', monospace; letter-spacing: -0.02em; }
+.sum-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.ops-card {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.ops-label { font-size: 11px; color: var(--text2); font-family: 'Geist Mono', monospace; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.result-item:last-child { border-bottom: none; }
+.result-key { color: var(--text2); font-family: 'Geist Mono', monospace; }
+.tag-merge { color: var(--green); font-family: 'Geist Mono', monospace; font-size: 11px; }
+.tag-main { color: var(--blue); font-family: 'Geist Mono', monospace; font-size: 11px; }
+.tag-skip { color: var(--text3); font-family: 'Geist Mono', monospace; font-size: 11px; }
+
+/* Warning */
+.warn-box {
+  background: var(--amber-bg);
+  border: 1px solid rgba(245,166,35,0.2);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+.warn-icon { color: var(--amber); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.warn-text { font-size: 12px; color: var(--amber); line-height: 1.5; }
+
+/* Input */
+.input-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; font-family: 'Geist Mono', monospace; }
+input[type=text] {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg1);
+  outline: none;
+  margin-bottom: 1.25rem;
+  font-family: 'Geist Mono', monospace;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input[type=text]:focus {
+  border-color: var(--border3);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+}
+
+/* Progress */
+.progress-wrap { padding: 2rem 0; }
+.progress-label { font-size: 13px; color: var(--text2); margin-bottom: 12px; font-family: 'Geist Mono', monospace; }
+.progress-bar { height: 2px; background: var(--bg3); border-radius: 1px; overflow: hidden; margin-bottom: 6px; }
+.progress-fill { height: 100%; background: var(--text); border-radius: 1px; transition: width 0.3s; }
+.progress-pct { font-size: 11px; color: var(--text3); font-family: 'Geist Mono', monospace; }
+
+/* Done */
+.done-wrap { padding: 2rem 0; }
+.done-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; }
+.done-check {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--green-bg);
+  border: 1px solid rgba(80,227,194,0.25);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--green);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.done-title { font-size: 16px; font-weight: 500; color: var(--text); letter-spacing: -0.02em; }
+.done-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="app-header">
+    <div class="app-logo">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1L13 12H1L7 1Z" fill="#000"/>
+      </svg>
+    </div>
+    <div class="app-title">Activision <span>/</span> Account Merger</div>
+  </div>
+
+  <div class="stepper">
+    <div class="step-dot active" id="dot0">1</div>
+    <div class="step-line" id="line01"></div>
+    <div class="step-dot" id="dot1">2</div>
+    <div class="step-line" id="line12"></div>
+    <div class="step-dot" id="dot2">3</div>
+    <div class="step-line" id="line23"></div>
+    <div class="step-dot" id="dot3">4</div>
+  </div>
+
+  <!-- STEP 0: Select primary account -->
+  <div class="step active" id="s0">
+    <div class="section-title">Primary account</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">This account will be kept. Content from the secondary account will be merged into it.</p>
+
+    <div class="acc-card selected" id="acc-xbox" onclick="selectMain('xbox')">
+      <div class="acc-row">
+        <div class="avatar av-xbox">XB</div>
+        <div class="acc-info">
+          <div class="acc-name">ShadowDenys_XBX</div>
+          <div class="acc-meta">Xbox Live · shadow#1234</div>
+        </div>
+        <div class="acc-badge" id="badge-xbox">primary</div>
+      </div>
+      <div class="acc-stats">
+        <div class="stat"><div class="stat-val">87</div><div class="stat-lbl">Level</div></div>
+        <div class="stat"><div class="stat-val">34</div><div class="stat-lbl">Skins</div></div>
+        <div class="stat"><div class="stat-val">120</div><div class="stat-lbl">Weapons</div></div>
+      </div>
+    </div>
+
+    <div class="acc-card" id="acc-steam" onclick="selectMain('steam')">
+      <div class="acc-row">
+        <div class="avatar av-steam">ST</div>
+        <div class="acc-info">
+          <div class="acc-name">fro1zek</div>
+          <div class="acc-meta">Steam · fro1z#5678</div>
+        </div>
+        <div class="acc-badge" id="badge-steam" style="display:none;">primary</div>
+      </div>
+      <div class="acc-stats">
+        <div class="stat"><div class="stat-val">54</div><div class="stat-lbl">Level</div></div>
+        <div class="stat"><div class="stat-val">12</div><div class="stat-lbl">Skins</div></div>
+        <div class="stat"><div class="stat-val">67</div><div class="stat-lbl">Weapons</div></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goStep(1)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 1: Configure merge -->
+  <div class="step" id="s1">
+    <div class="section-title">Configure transfer</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">Choose how each category is handled. Content marked as skip stays untouched.</p>
+
+    <div class="cat-row">
+      <div class="cat-ico blue">◈</div>
+      <div class="cat-body">
+        <div class="cat-name">Operator skins <span class="conflict-tag">41 unique</span></div>
+        <div class="cat-desc">Xbox: 34 · Steam: 12 · duplicates: 5</div>
+      </div>
+      <div class="seg" id="seg-skins">
+        <button class="seg-btn on-merge" onclick="setSeg('skins','merge',this)">merge</button>
+        <button class="seg-btn" onclick="setSeg('skins','main',this)">primary only</button>
+        <button class="seg-btn" onclick="setSeg('skins','skip',this)">skip</button>
+      </div>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-ico green">↑</div>
+      <div class="cat-body">
+        <div class="cat-name">Account level <span class="conflict-tag">conflict</span></div>
+        <div class="cat-desc">Xbox: 87 · Steam: 54</div>
+      </div>
+      <div class="seg" id="seg-level">
+        <button class="seg-btn on-main" onclick="setSeg('level','main',this)">take higher</button>
+        <button class="seg-btn" onclick="setSeg('level','skip',this)">skip</button>
+      </div>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-ico amber">⊞</div>
+      <div class="cat-body">
+        <div class="cat-name">Weapons & camos <span class="conflict-tag">145 unique</span></div>
+        <div class="cat-desc">Xbox: 120 · Steam: 67 · duplicates: 42</div>
+      </div>
+      <div class="seg" id="seg-weapons">
+        <button class="seg-btn on-merge" onclick="setSeg('weapons','merge',this)">merge</button>
+        <button class="seg-btn" onclick="setSeg('weapons','main',this)">primary only</button>
+        <button class="seg-btn" onclick="setSeg('weapons','skip',this)">skip</button>
+      </div>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-ico red">▶</div>
+      <div class="cat-body">
+        <div class="cat-name">Battle Pass <span class="conflict-tag">conflict</span></div>
+        <div class="cat-desc">Xbox: S8 tier 45 · Steam: S6 tier 80</div>
+      </div>
+      <div class="seg" id="seg-bp">
+        <button class="seg-btn on-main" onclick="setSeg('bp','main',this)">take higher</button>
+        <button class="seg-btn" onclick="setSeg('bp','merge',this)">merge</button>
+        <button class="seg-btn" onclick="setSeg('bp','skip',this)">skip</button>
+      </div>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-ico blue">$</div>
+      <div class="cat-body">
+        <div class="cat-name">CoD Points</div>
+        <div class="cat-desc">Xbox: 1400 CP · Steam: 600 CP</div>
+      </div>
+      <div class="seg" id="seg-cp">
+        <button class="seg-btn on-merge" onclick="setSeg('cp','merge',this)">sum</button>
+        <button class="seg-btn" onclick="setSeg('cp','main',this)">primary only</button>
+        <button class="seg-btn" onclick="setSeg('cp','skip',this)">skip</button>
+      </div>
+    </div>
+
+    <div class="cat-row">
+      <div class="cat-ico green">✓</div>
+      <div class="cat-body">
+        <div class="cat-name">Stats & achievements</div>
+        <div class="cat-desc">Xbox: 234 kills · Steam: 87 kills</div>
+      </div>
+      <div class="seg" id="seg-stats">
+        <button class="seg-btn on-merge" onclick="setSeg('stats','merge',this)">sum</button>
+        <button class="seg-btn" onclick="setSeg('stats','main',this)">take higher</button>
+        <button class="seg-btn" onclick="setSeg('stats','skip',this)">skip</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep(0)">← Back</button>
+      <button class="btn btn-primary" onclick="goStep(2)">Review →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Confirm -->
+  <div class="step" id="s2">
+    <div class="section-title">Review & confirm</div>
+
+    <div class="summary-grid">
+      <div class="sum-card">
+        <div class="sum-label">Primary</div>
+        <div class="sum-val" id="sum-main-name">ShadowDenys</div>
+        <div class="sum-sub" id="sum-main-platform">Xbox Live</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">Secondary</div>
+        <div class="sum-val" id="sum-sec-name">fro1zek</div>
+        <div class="sum-sub" id="sum-sec-platform">Steam</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">Operations</div>
+        <div class="sum-val" id="sum-items">5</div>
+        <div class="sum-sub">of 6 categories</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">New skins after merge</div>
+        <div class="sum-val">41</div>
+        <div class="sum-sub">+7 added to primary</div>
+      </div>
+    </div>
+
+    <div class="ops-card">
+      <div class="ops-label">Operations</div>
+      <div id="ops-list"></div>
+    </div>
+
+    <div class="warn-box">
+      <div class="warn-icon">⚠</div>
+      <div class="warn-text">This action is irreversible. The secondary account will be deactivated after the merge completes. Verify you have selected the correct primary account before proceeding.</div>
+    </div>
+
+    <div class="input-label">Type the primary account name to confirm</div>
+    <input type="text" id="confirm-input" placeholder="ShadowDenys_XBX" oninput="checkConfirm()">
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+      <button class="btn btn-primary" id="merge-btn" onclick="startMerge()" disabled>Merge accounts →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Progress + Done -->
+  <div class="step" id="s3">
+    <div id="progress-section" class="progress-wrap">
+      <div class="section-title">Merging</div>
+      <div class="progress-label" id="progress-label">Transferring operator skins...</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="progress-pct" id="progress-pct">0%</div>
+    </div>
+
+    <div id="done-section" class="done-wrap" style="display:none;">
+      <div class="done-header">
+        <div class="done-check">✓</div>
+        <div>
+          <div class="done-title">Merge complete</div>
+          <div class="done-sub">All selected data has been transferred to the primary account.</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="ops-label">Summary</div>
+      <div id="final-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let mainAcc = 'xbox';
+const choices = {skins:'merge',level:'main',weapons:'merge',bp:'main',cp:'merge',stats:'merge'};
+const labels = {skins:'Operator skins',level:'Account level',weapons:'Weapons & camos',bp:'Battle Pass',cp:'CoD Points',stats:'Stats & achievements'};
+const actionLabels = {merge:'merge',main:'take higher / primary',skip:'skip'};
+const actionClass = {merge:'tag-merge',main:'tag-main',skip:'tag-skip'};
+
+function selectMain(acc) {
+  mainAcc = acc;
+  document.getElementById('acc-xbox').classList.toggle('selected', acc==='xbox');
+  document.getElementById('acc-steam').classList.toggle('selected', acc==='steam');
+  document.getElementById('badge-xbox').style.display = acc==='xbox' ? '' : 'none';
+  document.getElementById('badge-steam').style.display = acc==='steam' ? '' : 'none';
+}
+
+function setSeg(key, val, btn) {
+  choices[key] = val;
+  const seg = btn.closest('.seg');
+  seg.querySelectorAll('.seg-btn').forEach(b => b.className = 'seg-btn');
+  btn.classList.add('on-' + val);
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach((s,i) => s.classList.toggle('active', i===n));
+  [0,1,2,3].forEach(i => {
+    const dot = document.getElementById('dot'+i);
+    dot.classList.remove('active','done');
+    if(i < n) dot.classList.add('done');
+    else if(i === n) dot.classList.add('active');
+  });
+  [['line01',0],['line12',1],['line23',2]].forEach(([id,i]) => {
+    const el = document.getElementById(id);
+    el.classList.toggle('done', n > i);
+  });
+  if(n===2) buildSummary();
+}
+
+function buildSummary() {
+  const isXbox = mainAcc==='xbox';
+  document.getElementById('sum-main-name').textContent = isXbox ? 'ShadowDenys' : 'fro1zek';
+  document.getElementById('sum-main-platform').textContent = isXbox ? 'Xbox Live' : 'Steam';
+  document.getElementById('sum-sec-name').textContent = isXbox ? 'fro1zek' : 'ShadowDenys';
+  document.getElementById('sum-sec-platform').textContent = isXbox ? 'Steam' : 'Xbox Live';
+  document.getElementById('sum-items').textContent = Object.values(choices).filter(v=>v!=='skip').length;
+  const list = document.getElementById('ops-list');
+  list.innerHTML = '';
+  Object.entries(choices).forEach(([k,v]) => {
+    const row = document.createElement('div');
+    row.className = 'result-item';
+    row.innerHTML = `<span class="result-key">${labels[k]}</span><span class="${actionClass[v]}">${actionLabels[v]}</span>`;
+    list.appendChild(row);
+  });
+  document.getElementById('confirm-input').value = '';
+  document.getElementById('merge-btn').disabled = true;
+}
+
+function checkConfirm() {
+  const expected = mainAcc==='xbox' ? 'ShadowDenys_XBX' : 'fro1zek';
+  document.getElementById('merge-btn').disabled = document.getElementById('confirm-input').value !== expected;
+}
+
+function startMerge() {
+  goStep(3);
+  const steps = Object.entries(choices).filter(([k,v])=>v!=='skip');
+  const pLabels = {
+    skins:'Transferring operator skins...',
+    level:'Updating account level...',
+    weapons:'Transferring weapons & camos...',
+    bp:'Syncing Battle Pass progress...',
+    cp:'Transferring CoD Points...',
+    stats:'Merging stats & achievements...'
+  };
+  let i = 0;
+  const fill = document.getElementById('progress-fill');
+  const lbl = document.getElementById('progress-label');
+  const pct = document.getElementById('progress-pct');
+  function next() {
+    if(i >= steps.length) {
+      document.getElementById('progress-section').style.display='none';
+      document.getElementById('done-section').style.display='block';
+      const fl = document.getElementById('final-list');
+      fl.innerHTML = '';
+      Object.entries(choices).forEach(([k,v]) => {
+        const row = document.createElement('div');
+        row.className = 'result-item';
+        row.innerHTML = `<span class="result-key">${labels[k]}</span><span class="${actionClass[v]}">${v==='skip'?'skipped':v==='merge'?'merged':'transferred'}</span>`;
+        fl.appendChild(row);
+      });
+      return;
+    }
+    const [key] = steps[i];
+    lbl.textContent = pLabels[key] || 'Processing...';
+    let cur = (i / steps.length) * 100;
+    const target = ((i+1) / steps.length) * 100;
+    const anim = setInterval(() => {
+      cur += 1.5;
+      if(cur >= target) { cur = target; clearInterval(anim); i++; setTimeout(next, 400); }
+      fill.style.width = Math.round(cur) + '%';
+      pct.textContent = Math.round(cur) + '%';
+    }, 25);
+  }
+  next();
+}
+</script>
+</body>
+</html>
