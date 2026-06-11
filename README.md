@@ -20,11 +20,11 @@ A one-time, user-controlled merge tool with per-category options:
 | Stats             | Sum both / Take higher / Skip  |
 
 ## How It Works
-1. **Preview** — user sees exactly what will change, no data is modified
-2. **Confirm** — user types the account name to prevent accidents
-3. **Execute** — all operations run inside a single database transaction;
+1. **Preview** - user sees exactly what will change, no data is modified
+2. **Confirm** - user types the account name to prevent accidents
+3. **Execute** - all operations run inside a single database transaction;
    if anything fails, everything rolls back automatically
-4. **Done** — secondary account is deactivated
+4. **Done** - secondary account is deactivated
 
 ## Stack
 - PostgreSQL (schema in `/schema.sql`)
