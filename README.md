@@ -1,12 +1,36 @@
-I wanted to share a feature idea that I think a lot of players would appreciate: a Cross-Account Merge tool for Warzone.
+# COD Account Merge — Concept Proposal
 
-The issue is straightforward — many players have content split across two Activision accounts (for example, one linked to Xbox and one to Steam). Right now there's no way to bring that content together, and it's one of the most common frustrations in the community.
+A proof-of-concept for a Cross-Account Merge feature for Call of Duty / Warzone.
 
-The idea: a one-time merge tool where the player selects a primary account and chooses how each content type is handled — merge unique skins, take the higher level, sum up stats, and so on. The secondary account gets deactivated after the process.
+## The Problem
+Players who have content spread across two Activision accounts
+(e.g. one on Xbox Live, one on Steam) have no official way to
+consolidate their skins, progress, and stats into a single profile.
 
-I've actually put together a working technical concept for this:
-- A preview step that shows exactly what will change before anything happens
-- All merge operations run inside a single database transaction (full rollback if anything fails)
-- Ownership check to ensure both accounts belong to the same user
+## The Proposal
+A one-time, user-controlled merge tool with per-category options:
 
-Happy to share the full prototype or technical spec if it's useful.
+| Category          | Options                        |
+|-------------------|-------------------------------|
+| Operator skins    | Merge unique / Keep main / Skip |
+| Weapon blueprints | Merge unique / Keep main / Skip |
+| Account level     | Take higher / Skip             |
+| Battle Pass       | Take higher / Skip             |
+| CoD Points        | Sum both / Keep main / Skip    |
+| Stats             | Sum both / Take higher / Skip  |
+
+## How It Works
+1. **Preview** — user sees exactly what will change, no data is modified
+2. **Confirm** — user types the account name to prevent accidents
+3. **Execute** — all operations run inside a single database transaction;
+   if anything fails, everything rolls back automatically
+4. **Done** — secondary account is deactivated
+
+## Stack
+- PostgreSQL (schema in `/schema.sql`)
+- Node.js + Express + TypeScript (backend in `/mergeService.ts` and `/merge.ts`)
+
+## Security
+- Ownership check: both accounts must belong to the same authenticated user
+- Duplicate merge prevention: already-merged pairs are rejected
+- Full rollback on any failure: zero risk of partial data corruption
