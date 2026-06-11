@@ -1,4 +1,4 @@
-# COD Account Merge — Concept Proposal
+# COD Account Merge - Concept Proposal
 
 A proof-of-concept for a Cross-Account Merge feature for Call of Duty / Warzone.
 
